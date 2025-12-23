@@ -1,0 +1,2210 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CLIGNANCAR | Location de Voitures Premium</title>
+
+<!-- Fonts & Icons -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700;800&family=Open+Sans:wght@300;400;600&family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<!-- Leaflet CSS pour la carte -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+     integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+     crossorigin=""/>
+<style>
+:root {
+    --black: #0b0b0b;
+    --gold: #c9a24d;
+    --red: #b1121a;
+    --white: #ffffff;
+    --gray: #888;
+    --light-gray: #f5f5f5;
+    --shadow: 0 15px 35px rgba(0,0,0,.25);
+    --transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: 'Open Sans', sans-serif;
+    background: #f5f5f5;
+    color: #222;
+    overflow-x: hidden;
+    direction: ltr;
+}
+
+/* FLOATING LANGUAGE SWITCH (LUXE) */
+.lang-floating {
+    position: fixed;
+    bottom: 20px;
+    left: 20px;
+    z-index: 999;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.lang-float-btn {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 2px solid var(--gold);
+    background: rgba(0, 0, 0, 0.85);
+    color: var(--gold);
+    font-weight: 700;
+    cursor: pointer;
+    transition: var(--transition);
+    font-family: 'Montserrat', sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    box-shadow: var(--shadow);
+}
+
+body.rtl .lang-float-btn {
+    font-family: 'Cairo', sans-serif;
+}
+
+.lang-float-btn:hover {
+    background: var(--gold);
+    color: var(--black);
+    transform: scale(1.1) rotate(5deg);
+    box-shadow: 0 10px 25px rgba(201,162,77,0.5);
+}
+
+.lang-float-btn.active {
+    background: var(--gold);
+    color: var(--black);
+    box-shadow: 0 8px 20px rgba(201,162,77,0.4);
+    transform: scale(1.05);
+}
+
+.lang-float-tooltip {
+    position: absolute;
+    right: 60px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(0, 0, 0, 0.9);
+    color: white;
+    padding: 8px 15px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    white-space: nowrap;
+    opacity: 0;
+    transition: var(--transition);
+    pointer-events: none;
+    border: 1px solid var(--gold);
+}
+
+body.rtl .lang-float-tooltip {
+    right: auto;
+    left: 60px;
+}
+
+.lang-float-tooltip::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 100%;
+    transform: translateY(-50%);
+    border-width: 6px;
+    border-style: solid;
+    border-color: transparent transparent transparent rgba(0, 0, 0, 0.9);
+}
+
+body.rtl .lang-float-tooltip::after {
+    left: auto;
+    right: 100%;
+    border-color: transparent rgba(0, 0, 0, 0.9) transparent transparent;
+}
+
+.lang-float-btn:hover .lang-float-tooltip {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
+}
+
+body.rtl {
+    direction: rtl;
+    font-family: 'Cairo', sans-serif;
+}
+
+body.rtl .logo .logo-text,
+body.rtl h1, 
+body.rtl h2, 
+body.rtl h3,
+body.rtl nav a,
+body.rtl .btn,
+body.rtl .contact-box h3,
+body.rtl .footer-links h4,
+body.rtl .footer-social h4,
+body.rtl .message-header span,
+body.rtl .whatsapp-tooltip,
+body.rtl .whatsapp-message-bubble .message-content,
+body.rtl .notification {
+    font-family: 'Cairo', sans-serif;
+}
+
+h1, h2, h3 {
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+
+.container {
+    width: 90%;
+    max-width: 1200px;
+    margin: auto;
+    padding: 0 15px;
+}
+
+/* HEADER */
+header {
+    background: var(--black);
+    position: sticky;
+    top: 0;
+    z-index: 999;
+    box-shadow: var(--shadow);
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 0;
+}
+
+.logo {
+    color: var(--white);
+    text-decoration: none;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.logo span {
+    color: var(--gold);
+    letter-spacing: 3px;
+    font-size: 1.2rem;
+    margin-bottom: 5px;
+    line-height: 1;
+}
+
+.logo .logo-text {
+    font-size: 2.2rem;
+    font-weight: 800;
+    letter-spacing: 2px;
+    color: var(--white);
+    line-height: 1;
+}
+
+nav ul {
+    list-style: none;
+    display: flex;
+    gap: 35px;
+}
+
+nav a {
+    color: white;
+    text-decoration: none;
+    font-weight: 600;
+    position: relative;
+    font-size: 1.1rem;
+    padding: 5px 0;
+}
+
+nav a::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: -5px;
+    width: 0;
+    height: 2px;
+    background: var(--gold);
+    transition: var(--transition);
+}
+
+body.rtl nav a::after {
+    left: auto;
+    right: 0;
+}
+
+nav a:hover::after {
+    width: 100%;
+}
+
+.menu-toggle {
+    display: none;
+    background: none;
+    border: none;
+    color: white;
+    font-size: 1.8rem;
+    cursor: pointer;
+}
+
+/* HERO */
+.hero {
+    background: linear-gradient(rgba(0,0,0,.85), rgba(0,0,0,.7)),
+    url('https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=2070&q=80') center/cover;
+    padding: 140px 0;
+    text-align: center;
+    color: white;
+    position: relative;
+}
+
+.hero h1 {
+    font-size: 3.4rem;
+    margin-bottom: 25px;
+    text-shadow: 2px 2px 10px rgba(0,0,0,0.5);
+}
+
+.hero p {
+    max-width: 800px;
+    margin: 25px auto;
+    color: #ddd;
+    font-size: 1.2rem;
+    line-height: 1.6;
+}
+
+.btn {
+    display: inline-block;
+    background: var(--gold);
+    color: black;
+    padding: 15px 35px;
+    font-weight: 800;
+    text-decoration: none;
+    border-radius: 4px;
+    transition: var(--transition);
+    border: none;
+    cursor: pointer;
+    font-size: 1.1rem;
+}
+
+.btn:hover {
+    background: #e6c36b;
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(201, 162, 77, 0.3);
+}
+
+/* SECTIONS */
+section {
+    padding: 130px 0;
+}
+
+.section-title {
+    text-align: center;
+    margin-bottom: 60px;
+}
+
+.section-title h2 {
+    font-size: 2.6rem;
+    margin-bottom: 15px;
+}
+
+.section-title span {
+    color: var(--gold);
+    letter-spacing: 6px;
+    font-size: 1.5rem;
+}
+
+/* SERVICES */
+.services {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 30px;
+}
+
+.service {
+    background: white;
+    padding: 40px 30px;
+    text-align: center;
+    border-top: 5px solid var(--gold);
+    box-shadow: var(--shadow);
+    transition: var(--transition);
+    border-radius: 8px;
+}
+
+.service:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+}
+
+.service i {
+    font-size: 3rem;
+    color: var(--gold);
+    margin-bottom: 20px;
+    transition: var(--transition);
+}
+
+.service:hover i {
+    transform: scale(1.2) rotate(5deg);
+}
+
+.service h3 {
+    font-size: 1.5rem;
+    margin-bottom: 15px;
+}
+
+/* VEHICLES */
+#cars {
+    background: #111;
+    color: white;
+}
+
+#cars .section-title h2 {
+    color: white;
+}
+
+.cars {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+}
+
+.car {
+    background: white;
+    color: black;
+    border-radius: 6px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    transition: var(--transition);
+    position: relative;
+}
+
+.car:hover {
+    transform: translateY(-10px);
+}
+
+.car-img {
+    width: 100%;
+    height: 220px;
+    object-fit: cover;
+    transition: var(--transition);
+}
+
+.car:hover .car-img {
+    transform: scale(1.05);
+}
+
+.car-content {
+    padding: 25px;
+}
+
+.price {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--gold);
+    margin: 15px 0;
+}
+
+.car-features {
+    display: flex;
+    justify-content: space-between;
+    margin: 15px 0;
+    color: var(--gray);
+    font-size: 0.9rem;
+}
+
+.car-features i {
+    color: var(--gold);
+    margin-right: 5px;
+}
+
+/* CONTACT */
+.contact {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    align-items: center;
+}
+
+.contact-box {
+    background: white;
+    padding: 40px;
+    box-shadow: var(--shadow);
+    border-radius: 8px;
+    position: relative;
+    overflow: hidden;
+}
+
+.contact-box:first-child::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 5px;
+    height: 100%;
+    background: var(--gold);
+}
+
+body.rtl .contact-box:first-child::before {
+    left: auto;
+    right: 0;
+}
+
+.contact-box h3 {
+    font-size: 1.8rem;
+    margin-bottom: 25px;
+}
+
+.contact-detail {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+    transition: var(--transition);
+    padding: 10px;
+    border-radius: 5px;
+}
+
+body.rtl .contact-detail {
+    flex-direction: row-reverse;
+    text-align: right;
+}
+
+.contact-detail:hover {
+    background: rgba(201, 162, 77, 0.05);
+    transform: translateX(10px);
+}
+
+body.rtl .contact-detail:hover {
+    transform: translateX(-10px);
+}
+
+.contact-detail i {
+    font-size: 1.5rem;
+    color: var(--gold);
+    margin-right: 20px;
+    width: 40px;
+    flex-shrink: 0;
+}
+
+body.rtl .contact-detail i {
+    margin-right: 0;
+    margin-left: 20px;
+}
+
+.contact-detail p {
+    font-size: 1.1rem;
+    color: var(--gray);
+}
+
+input, textarea, select {
+    width: 100%;
+    padding: 14px;
+    margin-bottom: 18px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-family: 'Open Sans', sans-serif;
+    transition: var(--transition);
+}
+
+body.rtl input,
+body.rtl textarea,
+body.rtl select {
+    font-family: 'Cairo', sans-serif;
+    text-align: right;
+}
+
+input:focus, textarea:focus, select:focus {
+    border-color: var(--gold);
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(201, 162, 77, 0.2);
+}
+
+/* CARTE ET COORDONNÉES - NOUVEAU STYLE */
+#location {
+    padding: 100px 0;
+    background: var(--light-gray);
+}
+
+.location-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    align-items: stretch;
+}
+
+.map-container {
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    height: 500px;
+    position: relative;
+}
+
+#map {
+    width: 100%;
+    height: 100%;
+    border-radius: 12px;
+}
+
+.map-overlay {
+    position: absolute;
+    bottom: 20px;
+    left: 20px;
+    background: rgba(0, 0, 0, 0.85);
+    color: white;
+    padding: 20px;
+    border-radius: 8px;
+    max-width: 300px;
+    border-left: 4px solid var(--gold);
+    z-index: 500;
+}
+
+body.rtl .map-overlay {
+    left: auto;
+    right: 20px;
+    border-left: none;
+    border-right: 4px solid var(--gold);
+}
+
+.map-overlay h3 {
+    color: var(--gold);
+    margin-bottom: 10px;
+    font-size: 1.2rem;
+}
+
+.map-overlay p {
+    font-size: 0.95rem;
+    color: #ddd;
+    margin-bottom: 5px;
+}
+
+.map-overlay i {
+    margin-right: 8px;
+    color: var(--gold);
+}
+
+body.rtl .map-overlay i {
+    margin-right: 0;
+    margin-left: 8px;
+}
+
+.location-details {
+    background: white;
+    padding: 40px;
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    position: relative;
+    border-top: 5px solid var(--gold);
+}
+
+.location-details h3 {
+    font-size: 1.8rem;
+    margin-bottom: 30px;
+    color: var(--black);
+    position: relative;
+    padding-bottom: 15px;
+}
+
+.location-details h3::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 60px;
+    height: 3px;
+    background: var(--gold);
+}
+
+body.rtl .location-details h3::after {
+    left: auto;
+    right: 0;
+}
+
+.location-info {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+.location-item {
+    display: flex;
+    align-items: flex-start;
+    padding: 15px;
+    border-radius: 8px;
+    transition: var(--transition);
+    background: rgba(201, 162, 77, 0.05);
+}
+
+body.rtl .location-item {
+    flex-direction: row-reverse;
+    text-align: right;
+}
+
+.location-item:hover {
+    background: rgba(201, 162, 77, 0.1);
+    transform: translateX(5px);
+}
+
+body.rtl .location-item:hover {
+    transform: translateX(-5px);
+}
+
+.location-icon {
+    width: 50px;
+    height: 50px;
+    background: var(--gold);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: black;
+    font-size: 1.3rem;
+    margin-right: 20px;
+    flex-shrink: 0;
+}
+
+body.rtl .location-icon {
+    margin-right: 0;
+    margin-left: 20px;
+}
+
+.location-text h4 {
+    font-size: 1.1rem;
+    color: var(--black);
+    margin-bottom: 5px;
+    font-weight: 600;
+}
+
+.location-text p {
+    color: var(--gray);
+    line-height: 1.6;
+}
+
+/* COORDONNÉES FOOTER - NOUVEAU STYLE */
+.footer-coordinates {
+    background: var(--black);
+    padding: 60px 0;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.footer-coordinates .container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 40px;
+}
+
+.coord-card {
+    background: rgba(255,255,255,0.05);
+    padding: 30px;
+    border-radius: 10px;
+    border-left: 4px solid var(--gold);
+    transition: var(--transition);
+}
+
+body.rtl .coord-card {
+    border-left: none;
+    border-right: 4px solid var(--gold);
+}
+
+.coord-card:hover {
+    background: rgba(255,255,255,0.1);
+    transform: translateY(-5px);
+}
+
+.coord-card h4 {
+    color: var(--gold);
+    font-size: 1.3rem;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.coord-card p {
+    color: #ddd;
+    line-height: 1.7;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.coord-card i {
+    color: var(--gold);
+    width: 20px;
+}
+
+/* WHATSAPP FLOATING WIDGET */
+.whatsapp-widget {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 15px;
+}
+
+body.rtl .whatsapp-widget {
+    right: auto;
+    left: 20px;
+}
+
+.whatsapp-button {
+    background: #25D366;
+    color: white;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    text-decoration: none;
+    box-shadow: 0 10px 25px rgba(37, 211, 102, 0.3);
+    transition: var(--transition);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+.whatsapp-button:hover {
+    background: #128C7E;
+    transform: scale(1.15) rotate(5deg);
+    box-shadow: 0 15px 30px rgba(37, 211, 102, 0.4);
+}
+
+.whatsapp-tooltip {
+    background: rgba(0, 0, 0, 0.85);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    max-width: 250px;
+    text-align: center;
+    box-shadow: var(--shadow);
+    opacity: 0;
+    transform: translateY(10px);
+    transition: var(--transition);
+    position: absolute;
+    right: 70px;
+    top: 50%;
+    transform: translateY(-50%) translateX(10px);
+    pointer-events: none;
+    white-space: nowrap;
+}
+
+body.rtl .whatsapp-tooltip {
+    right: auto;
+    left: 70px;
+    text-align: center;
+}
+
+body.rtl .whatsapp-tooltip::after {
+    left: auto;
+    right: 100%;
+    border-color: transparent rgba(0, 0, 0, 0.85) transparent transparent;
+}
+
+.whatsapp-tooltip::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 100%;
+    transform: translateY(-50%);
+    border-width: 8px;
+    border-style: solid;
+    border-color: transparent transparent transparent rgba(0, 0, 0, 0.85);
+}
+
+.whatsapp-button:hover + .whatsapp-tooltip {
+    opacity: 1;
+    transform: translateY(-50%) translateX(0);
+}
+
+/* BOT WHATSAPP MESSAGE */
+.whatsapp-message-bubble {
+    position: fixed;
+    bottom: 90px;
+    right: 20px;
+    background: white;
+    padding: 15px;
+    border-radius: 18px 18px 0 18px;
+    box-shadow: var(--shadow);
+    max-width: 250px;
+    z-index: 999;
+    transform: translateY(20px);
+    opacity: 0;
+    transition: var(--transition);
+    border: 1px solid #e0e0e0;
+}
+
+body.rtl .whatsapp-message-bubble {
+    right: auto;
+    left: 20px;
+    border-radius: 18px 18px 18px 0;
+}
+
+.whatsapp-message-bubble.show {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.whatsapp-message-bubble::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    right: 10px;
+    border-width: 10px;
+    border-style: solid;
+    border-color: white transparent transparent transparent;
+}
+
+body.rtl .whatsapp-message-bubble::after {
+    right: auto;
+    left: 10px;
+}
+
+.message-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+body.rtl .message-header {
+    flex-direction: row-reverse;
+}
+
+.message-header img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #25D366;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.2rem;
+}
+
+.message-header span {
+    font-weight: 600;
+    color: var(--black);
+}
+
+.message-content {
+    color: var(--gray);
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+/* FOOTER */
+footer {
+    background: var(--black);
+    color: #aaa;
+    padding: 40px 0;
+    text-align: center;
+}
+
+.footer-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 40px;
+    margin-bottom: 30px;
+}
+
+.footer-logo {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+body.rtl .footer-logo {
+    align-items: flex-end;
+    text-align: right;
+}
+
+.footer-logo span {
+    color: var(--gold);
+    letter-spacing: 3px;
+    font-size: 1rem;
+    margin-bottom: 10px;
+}
+
+.footer-logo .logo-text {
+    font-size: 1.8rem;
+    font-weight: 800;
+    letter-spacing: 2px;
+    color: white;
+}
+
+.footer-links h4,
+.footer-social h4 {
+    color: white;
+    margin-bottom: 20px;
+    font-size: 1.3rem;
+}
+
+.footer-links ul {
+    list-style: none;
+}
+
+.footer-links li {
+    margin-bottom: 12px;
+}
+
+.footer-links a {
+    color: #aaa;
+    text-decoration: none;
+    transition: var(--transition);
+}
+
+.footer-links a:hover {
+    color: var(--gold);
+    padding-left: 5px;
+}
+
+body.rtl .footer-links a:hover {
+    padding-left: 0;
+    padding-right: 5px;
+}
+
+.social-icons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+}
+
+.social-icons a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 45px;
+    height: 45px;
+    background: rgba(255,255,255,0.1);
+    color: white;
+    border-radius: 50%;
+    text-decoration: none;
+    transition: var(--transition);
+    font-size: 1.2rem;
+}
+
+.social-icons a:hover {
+    background: var(--gold);
+    color: black;
+    transform: translateY(-5px);
+}
+
+.copyright {
+    padding-top: 30px;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    color: #888;
+    font-size: 0.9rem;
+}
+
+/* NOTIFICATION STYLES */
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: var(--gold);
+    color: black;
+    padding: 15px 25px;
+    border-radius: 8px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    z-index: 10000;
+    font-weight: 600;
+    animation: slideInRight 0.5s ease;
+}
+
+body.rtl .notification {
+    right: auto;
+    left: 20px;
+    animation: slideInLeft 0.5s ease;
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideInLeft {
+    from {
+        transform: translateX(-100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOutRight {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}
+
+@keyframes slideOutLeft {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(-100%);
+        opacity: 0;
+    }
+}
+
+/* RESPONSIVE */
+@media (max-width: 992px) {
+    .hero h1 {
+        font-size: 2.8rem;
+    }
+    
+    .contact {
+        grid-template-columns: 1fr;
+        gap: 30px;
+    }
+    
+    .location-container {
+        grid-template-columns: 1fr;
+        gap: 30px;
+    }
+    
+    .map-container {
+        height: 400px;
+    }
+}
+
+@media (max-width: 768px) {
+    .menu-toggle {
+        display: block;
+    }
+    
+    nav ul {
+        position: fixed;
+        top: 80px;
+        left: -100%;
+        flex-direction: column;
+        background: var(--black);
+        width: 100%;
+        text-align: center;
+        padding: 30px 0;
+        transition: var(--transition);
+        box-shadow: var(--shadow);
+        z-index: 998;
+    }
+    
+    body.rtl nav ul {
+        left: auto;
+        right: -100%;
+    }
+    
+    nav ul.active {
+        left: 0;
+    }
+    
+    body.rtl nav ul.active {
+        left: auto;
+        right: 0;
+    }
+    
+    .hero h1 {
+        font-size: 2.2rem;
+    }
+    
+    .section-title h2 {
+        font-size: 2.2rem;
+    }
+    
+    .cars {
+        grid-template-columns: 1fr;
+    }
+    
+    .whatsapp-tooltip {
+        display: none;
+    }
+    
+    .whatsapp-message-bubble {
+        max-width: 200px;
+        right: 15px;
+        bottom: 85px;
+    }
+    
+    body.rtl .whatsapp-message-bubble {
+        right: auto;
+        left: 15px;
+    }
+    
+    .header {
+        flex-wrap: wrap;
+    }
+    
+    .location-details,
+    .contact-box {
+        padding: 25px;
+    }
+    
+    .map-overlay {
+        max-width: 250px;
+        padding: 15px;
+    }
+}
+
+@media (max-width: 576px) {
+    .logo .logo-text {
+        font-size: 1.8rem;
+    }
+    
+    .hero h1 {
+        font-size: 1.8rem;
+    }
+    
+    .hero p {
+        font-size: 1.1rem;
+    }
+    
+    .btn {
+        padding: 15px 30px;
+    }
+    
+    .whatsapp-button {
+        width: 55px;
+        height: 55px;
+        font-size: 1.8rem;
+    }
+    
+    .lang-float-btn {
+        width: 42px;
+        height: 42px;
+        font-size: 0.8rem;
+    }
+    
+    .lang-floating {
+        bottom: 15px;
+        left: 15px;
+    }
+    
+    .location-item {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    body.rtl .location-item {
+        flex-direction: column;
+    }
+    
+    .location-icon {
+        margin: 0 0 15px 0;
+    }
+    
+    body.rtl .location-icon {
+        margin: 0 0 15px 0;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<!-- WHATSAPP FLOATING WIDGET -->
+<div class="whatsapp-widget">
+    <a href="https://wa.me/212600000000?text=Hello%20ClignanCar,%20I%20am%20interested%20in%20a%20car%20rental." 
+       class="whatsapp-button" 
+       target="_blank"
+       aria-label="Contact on WhatsApp"
+       id="whatsappLink">
+        <i class="fab fa-whatsapp"></i>
+    </a>
+    <div class="whatsapp-tooltip" id="whatsappTooltip">
+        Contactez-nous sur WhatsApp
+    </div>
+    
+    <div class="whatsapp-message-bubble" id="whatsappBubble">
+        <div class="message-header">
+            <div style="background:#25D366; width:40px; height:40px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:white;">
+                <i class="fab fa-whatsapp"></i>
+            </div>
+            <span id="bubbleTitle">ClignanCar Support</span>
+        </div>
+        <div class="message-content" id="bubbleMessage">
+            Bonjour ! Besoin d'aide pour votre location de voiture premium ? Nous sommes là pour vous !
+        </div>
+    </div>
+</div>
+
+<!-- HEADER -->
+<header>
+    <div class="container header">
+        <a class="logo" href="#">
+            <span>★★★★★</span>
+            <div class="logo-text">CLIGNANCAR</div>
+        </a>
+        
+        <button class="menu-toggle" id="menuToggle">
+            <i class="fas fa-bars"></i>
+        </button>
+        
+        <nav>
+            <ul id="navMenu">
+                <li><a href="#services" data-key="nav-services">Services</a></li>
+                <li><a href="#cars" data-key="nav-vehicles">Véhicules</a></li>
+                <li><a href="#location" data-key="nav-location">Localisation</a></li>
+                <li><a href="#contact" data-key="nav-contact">Contact</a></li>
+            </ul>
+        </nav>
+    </div>
+</header>
+
+<!-- HERO -->
+<section class="hero">
+    <div class="container">
+        <h1 id="heroTitle">Location de Voitures Luxe & Sport</h1>
+        <p id="heroText">Vivez une expérience automobile exclusive avec CLIGNANCAR. Notre flotte premium et notre service d'exception vous attendent.</p>
+        <a class="btn" href="#cars" id="heroBtn">Découvrir la flotte</a>
+    </div>
+</section>
+
+<!-- SERVICES -->
+<section id="services">
+    <div class="container">
+        <div class="section-title">
+            <h2 id="servicesTitle">Nos Services</h2>
+            <span>★★★★★</span>
+        </div>
+        <div class="services">
+            <div class="service">
+                <i class="fas fa-car"></i>
+                <h3 id="service1Title">Location Premium</h3>
+                <p id="service1Text">Véhicules haut de gamme régulièrement entretenus. Assurance tous risques incluse.</p>
+            </div>
+            <div class="service">
+                <i class="fas fa-plane"></i>
+                <h3 id="service2Title">Service Aéroport</h3>
+                <p id="service2Text">Livraison et récupération directement à l'aéroport pour plus de commodité.</p>
+            </div>
+            <div class="service">
+                <i class="fas fa-concierge-bell"></i>
+                <h3 id="service3Title">Service VIP</h3>
+                <p id="service3Text">Conciergerie disponible 24h/24 pour répondre à toutes vos demandes spéciales.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- VEHICLES -->
+<section id="cars">
+    <div class="container">
+        <div class="section-title">
+            <h2 id="vehiclesTitle">Notre Flotte Exclusive</h2>
+            <span>★★★★★</span>
+        </div>
+        <div class="cars">
+            <div class="car">
+                <img src="https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&w=2070&q=80" alt="BMW Série 7" class="car-img">
+                <div class="car-content">
+                    <h3>BMW Série 7</h3>
+                    <div class="car-features">
+                        <span><i class="fas fa-users"></i> <span id="seats1">5 places</span></span>
+                        <span><i class="fas fa-cog"></i> <span id="transmission1">Automatique</span></span>
+                        <span><i class="fas fa-gas-pump"></i> <span id="fuel1">Essence</span></span>
+                    </div>
+                    <p id="car1Desc">Performance et élégance allemande au service de votre confort.</p>
+                    <div class="price" id="car1Price">179€ / jour</div>
+                </div>
+            </div>
+            
+            <div class="car">
+                <img src="https://images.unsplash.com/photo-1553440569-bcc63803a83d?auto=format&fit=crop&w=2070&q=80" alt="Mercedes Classe S" class="car-img">
+                <div class="car-content">
+                    <h3>Mercedes Classe S</h3>
+                    <div class="car-features">
+                        <span><i class="fas fa-users"></i> <span id="seats2">5 places</span></span>
+                        <span><i class="fas fa-cog"></i> <span id="transmission2">Automatique</span></span>
+                        <span><i class="fas fa-gas-pump"></i> <span id="fuel2">Hybride</span></span>
+                    </div>
+                    <p id="car2Desc">Le summum du luxe automobile, technologie et confort inégalés.</p>
+                    <div class="price" id="car2Price">199€ / jour</div>
+                </div>
+            </div>
+            
+            <div class="car">
+                <img src="https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&w=2070&q=80" alt="Porsche 911" class="car-img">
+                <div class="car-content">
+                    <h3>Porsche 911</h3>
+                    <div class="car-features">
+                        <span><i class="fas fa-users"></i> <span id="seats3">2+2 places</span></span>
+                        <span><i class="fas fa-cog"></i> <span id="transmission3">Automatique</span></span>
+                        <span><i class="fas fa-gas-pump"></i> <span id="fuel3">Essence</span></span>
+                    </div>
+                    <p id="car3Desc">Légende automobile pour les passionnés de sensations fortes.</p>
+                    <div class="price" id="car3Price">249€ / jour</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- NOUVELLE SECTION : CARTE ET LOCALISATION -->
+<section id="location">
+    <div class="container">
+        <div class="section-title">
+            <h2 id="locationTitle">Notre Localisation</h2>
+            <span>★★★★★</span>
+        </div>
+        
+        <div class="location-container">
+            <div class="map-container">
+                <div id="map"></div>
+                <div class="map-overlay">
+                    <h3 id="mapTitle">CLIGNANCAR Maroc</h3>
+                    <p><i class="fas fa-map-marker-alt"></i> <span id="mapAddress">Avenue Mohammed VI, Casablanca, Maroc</span></p>
+                    <p><i class="fas fa-clock"></i> <span id="mapHours">Lun-Dim: 8h00-22h00</span></p>
+                    <p><i class="fas fa-phone"></i> <span>+212 6 XX XX XX XX</span></p>
+                </div>
+            </div>
+            
+            <div class="location-details">
+                <h3 id="detailsTitle">Coordonnées Détaillées</h3>
+                <div class="location-info">
+                    <div class="location-item">
+                        <div class="location-icon">
+                            <i class="fas fa-map-marker-alt"></i>
+                        </div>
+                        <div class="location-text">
+                            <h4 id="addressTitle">Adresse Principale</h4>
+                            <p id="fullAddress">Avenue Mohammed VI, Immeuble Le Prestige<br>2ème étage, Bureau 204<br>20000 Casablanca, Maroc</p>
+                        </div>
+                    </div>
+                    
+                    <div class="location-item">
+                        <div class="location-icon">
+                            <i class="fas fa-phone"></i>
+                        </div>
+                        <div class="location-text">
+                            <h4 id="phoneTitle">Téléphones</h4>
+                            <p>+212 6 XX XX XX XX (Service Commercial)<br>+212 6 XX XX XX XX (Support 24/7)</p>
+                        </div>
+                    </div>
+                    
+                    <div class="location-item">
+                        <div class="location-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="location-text">
+                            <h4 id="hoursTitle">Horaires d'Ouverture</h4>
+                            <p id="detailedHours"><strong>Lundi - Samedi:</strong> 8h00 - 22h00<br><strong>Dimanche:</strong> 9h00 - 20h00<br><strong>Service Urgence:</strong> 24h/24, 7j/7</p>
+                        </div>
+                    </div>
+                    
+                    <div class="location-item">
+                        <div class="location-icon">
+                            <i class="fas fa-envelope"></i>
+                        </div>
+                        <div class="location-text">
+                            <h4 id="emailTitle">Emails</h4>
+                            <p>contact@clignancar.com<br>reservation@clignancar.com<br>support@clignancar.com</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+    <div class="container">
+        <div class="section-title">
+            <h2 id="contactTitle">Contact & Réservation</h2>
+            <span>★★★★★</span>
+        </div>
+        
+        <div class="contact">
+            <div class="contact-box">
+                <h3 id="contactInfoTitle">Nos coordonnées</h3>
+                
+                <div class="contact-detail">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <div>
+                        <p><strong id="addressLabel">Adresse</strong></p>
+                        <p id="address">Avenue Mohammed VI, Casablanca, Maroc</p>
+                    </div>
+                </div>
+                
+                <div class="contact-detail">
+                    <i class="fas fa-phone"></i>
+                    <div>
+                        <p><strong id="phoneLabel">Téléphone</strong></p>
+                        <p>+212 6 XX XX XX XX</p>
+                    </div>
+                </div>
+                
+                <div class="contact-detail">
+                    <i class="fas fa-clock"></i>
+                    <div>
+                        <p><strong id="hoursLabel">Horaires d'ouverture</strong></p>
+                        <p id="hours">Lundi - Dimanche: 8h00 - 22h00</p>
+                    </div>
+                </div>
+                
+                <div class="contact-detail">
+                    <i class="fas fa-envelope"></i>
+                    <div>
+                        <p><strong id="emailLabel">Email</strong></p>
+                        <p>contact@clignancar.com</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="contact-box">
+                <h3 id="reservationTitle">Demande de réservation</h3>
+                <form id="reservationForm">
+                    <input type="text" id="nameInput" placeholder="Votre nom complet" required>
+                    <input type="tel" id="phoneInput" placeholder="Votre téléphone" required>
+                    <input type="email" id="emailInput" placeholder="Votre email">
+                    <select id="carSelect" required>
+                        <option value="" id="selectDefault">Sélectionnez un véhicule</option>
+                        <option id="option1">BMW Série 7</option>
+                        <option id="option2">Mercedes Classe S</option>
+                        <option id="option3">Porsche 911</option>
+                        <option id="option4">Autre véhicule premium</option>
+                    </select>
+                    <textarea id="messageInput" placeholder="Dates souhaitées et informations complémentaires..." rows="4"></textarea>
+                    <button type="submit" class="btn" style="width: 100%;" id="submitBtn">Envoyer la demande</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- NOUVELLE SECTION : COORDONNÉES FOOTER -->
+<div class="footer-coordinates">
+    <div class="container">
+        <div class="coord-card">
+            <h4><i class="fas fa-map-marked-alt"></i> <span id="footerAddressTitle">Adresse Complète</span></h4>
+            <p><i class="fas fa-location-dot"></i> <span id="footerAddress">Avenue Mohammed VI, Immeuble Le Prestige, 2ème étage, Bureau 204, 20000 Casablanca, Maroc</span></p>
+            <p><i class="fas fa-location-crosshairs"></i> <span id="footerGPS">GPS: 33.5731° N, 7.5898° W</span></p>
+        </div>
+        
+        <div class="coord-card">
+            <h4><i class="fas fa-phone-volume"></i> <span id="footerContactTitle">Contact Direct</span></h4>
+            <p><i class="fas fa-phone"></i> <span>+212 6 XX XX XX XX (Commercial)</span></p>
+            <p><i class="fas fa-headset"></i> <span>+212 6 XX XX XX XX (Support)</span></p>
+            <p><i class="fas fa-fax"></i> <span>+212 5 XX XX XX XX (Fax)</span></p>
+        </div>
+        
+        <div class="coord-card">
+            <h4><i class="fas fa-business-time"></i> <span id="footerHoursTitle">Horaires Élargis</span></h4>
+            <p><i class="fas fa-calendar-day"></i> <span id="footerWeekDays">Lun-Sam: 8h00-22h00</span></p>
+            <p><i class="fas fa-calendar-week"></i> <span id="footerWeekend">Dimanche: 9h00-20h00</span></p>
+            <p><i class="fas fa-triangle-exclamation"></i> <span id="footerEmergency">Urgence: 24h/24, 7j/7</span></p>
+        </div>
+    </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+    <div class="container">
+        <div class="footer-content">
+            <div class="footer-logo">
+                <span>★★★★★</span>
+                <div class="logo-text">CLIGNANCAR</div>
+                <p style="margin-top: 15px; text-align: left;" id="footerText">Location de voitures premium au Maroc. Excellence garantie.</p>
+            </div>
+            
+            <div class="footer-links">
+                <h4 id="footerNavTitle">Navigation</h4>
+                <ul>
+                    <li><a href="#services" id="footerNav1">Nos services</a></li>
+                    <li><a href="#cars" id="footerNav2">Notre flotte</a></li>
+                    <li><a href="#location" id="footerNav3">Localisation</a></li>
+                    <li><a href="#contact" id="footerNav4">Contact & réservation</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-social">
+                <h4 id="footerFollowTitle">Suivez-nous</h4>
+                <div class="social-icons">
+                    <a href="#"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="copyright">
+            <p id="copyrightText">© 2025 CLIGNANCAR – Location de voitures premium – Tous droits réservés</p>
+        </div>
+    </div>
+</footer>
+
+<div class="lang-floating">
+    <button class="lang-float-btn active" data-lang="fr">FR</button>
+    <button class="lang-float-btn" data-lang="ar">ع</button>
+    <button class="lang-float-btn" data-lang="en">EN</button>
+</div>
+
+<!-- Leaflet JS pour la carte -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+     crossorigin=""></script>
+
+<!-- TRANSLATIONS DATA -->
+<script>
+const translations = {
+    fr: {
+        // Navigation
+        "nav-services": "Services",
+        "nav-vehicles": "Véhicules",
+        "nav-location": "Localisation",
+        "nav-contact": "Contact",
+        
+        // Hero
+        "heroTitle": "Location de Voitures Luxe & Sport",
+        "heroText": "Vivez une expérience automobile exclusive avec CLIGNANCAR. Notre flotte premium et notre service d'exception vous attendent.",
+        "heroBtn": "Découvrir la flotte",
+        
+        // Services
+        "servicesTitle": "Nos Services",
+        "service1Title": "Location Premium",
+        "service1Text": "Véhicules haut de gamme régulièrement entretenus. Assurance tous risques incluse.",
+        "service2Title": "Service Aéroport",
+        "service2Text": "Livraison et récupération directement à l'aéroport pour plus de commodité.",
+        "service3Title": "Service VIP",
+        "service3Text": "Conciergerie disponible 24h/24 pour répondre à toutes vos demandes spéciales.",
+        
+        // Vehicles
+        "vehiclesTitle": "Notre Flotte Exclusive",
+        "seats1": "5 places",
+        "seats2": "5 places",
+        "seats3": "2+2 places",
+        "transmission1": "Automatique",
+        "transmission2": "Automatique",
+        "transmission3": "Automatique",
+        "fuel1": "Essence",
+        "fuel2": "Hybride",
+        "fuel3": "Essence",
+        "car1Desc": "Performance et élégance allemande au service de votre confort.",
+        "car2Desc": "Le summum du luxe automobile, technologie et confort inégalés.",
+        "car3Desc": "Légende automobile pour les passionnés de sensations fortes.",
+        "car1Price": "179€ / jour",
+        "car2Price": "199€ / jour",
+        "car3Price": "249€ / jour",
+        
+        // Location Section
+        "locationTitle": "Notre Localisation",
+        "mapTitle": "CLIGNANCAR Maroc",
+        "mapAddress": "Avenue Mohammed VI, Casablanca, Maroc",
+        "mapHours": "Lun-Dim: 8h00-22h00",
+        "detailsTitle": "Coordonnées Détaillées",
+        "addressTitle": "Adresse Principale",
+        "fullAddress": "Avenue Mohammed VI, Immeuble Le Prestige<br>2ème étage, Bureau 204<br>20000 Casablanca, Maroc",
+        "phoneTitle": "Téléphones",
+        "hoursTitle": "Horaires d'Ouverture",
+        "detailedHours": "<strong>Lundi - Samedi:</strong> 8h00 - 22h00<br><strong>Dimanche:</strong> 9h00 - 20h00<br><strong>Service Urgence:</strong> 24h/24, 7j/7",
+        "emailTitle": "Emails",
+        
+        // Footer Coordinates
+        "footerAddressTitle": "Adresse Complète",
+        "footerAddress": "Avenue Mohammed VI, Immeuble Le Prestige, 2ème étage, Bureau 204, 20000 Casablanca, Maroc",
+        "footerGPS": "GPS: 33.5731° N, 7.5898° W",
+        "footerContactTitle": "Contact Direct",
+        "footerHoursTitle": "Horaires Élargis",
+        "footerWeekDays": "Lun-Sam: 8h00-22h00",
+        "footerWeekend": "Dimanche: 9h00-20h00",
+        "footerEmergency": "Urgence: 24h/24, 7j/7",
+        
+        // Contact
+        "contactTitle": "Contact & Réservation",
+        "contactInfoTitle": "Nos coordonnées",
+        "addressLabel": "Adresse",
+        "address": "Avenue Mohammed VI, Casablanca, Maroc",
+        "phoneLabel": "Téléphone",
+        "hoursLabel": "Horaires d'ouverture",
+        "hours": "Lundi - Dimanche: 8h00 - 22h00",
+        "emailLabel": "Email",
+        "reservationTitle": "Demande de réservation",
+        "namePlaceholder": "Votre nom complet",
+        "phonePlaceholder": "Votre téléphone",
+        "emailPlaceholder": "Votre email",
+        "selectDefault": "Sélectionnez un véhicule",
+        "option1": "BMW Série 7",
+        "option2": "Mercedes Classe S",
+        "option3": "Porsche 911",
+        "option4": "Autre véhicule premium",
+        "messagePlaceholder": "Dates souhaitées et informations complémentaires...",
+        "submitBtn": "Envoyer la demande",
+        
+        // Footer
+        "footerText": "Location de voitures premium au Maroc. Excellence garantie.",
+        "footerNavTitle": "Navigation",
+        "footerNav1": "Nos services",
+        "footerNav2": "Notre flotte",
+        "footerNav3": "Localisation",
+        "footerNav4": "Contact & réservation",
+        "footerFollowTitle": "Suivez-nous",
+        "copyrightText": "© 2025 CLIGNANCAR – Location de voitures premium – Tous droits réservés",
+        
+        // WhatsApp
+        "whatsappTooltip": "Contactez-nous sur WhatsApp",
+        "bubbleTitle": "ClignanCar Support",
+        "bubbleMessage": "Bonjour ! Besoin d'aide pour votre location de voiture premium ? Nous sommes là pour vous !",
+        "whatsappMessage": "Bonjour ClignanCar, je suis intéressé par une location de voiture.",
+        "notificationSending": "Ouverture de WhatsApp...",
+        "notificationSuccess": "Demande envoyée avec succès !",
+        "languageChanged": "Langue changée en Français"
+    },
+    
+    ar: {
+        // Navigation
+        "nav-services": "الخدمات",
+        "nav-vehicles": "المركبات",
+        "nav-location": "الموقع",
+        "nav-contact": "اتصل بنا",
+        
+        // Hero
+        "heroTitle": "تأجير سيارات الفاخرة والرياضية",
+        "heroText": "عش تجربة سيارات حصرية مع كليجناكار. أسطولنا المميز وخدمتنا الاستثنائية في انتظارك.",
+        "heroBtn": "اكتشف الأسطول",
+        
+        // Services
+        "servicesTitle": "خدماتنا",
+        "service1Title": "تأجير مميز",
+        "service1Text": "سيارات فاخرة تتم صيانتها بانتظام. تأمين شامل ضد جميع المخاطر.",
+        "service2Title": "خدمة المطار",
+        "service2Text": "تسليم واستلام مباشرة في المطار لمزيد من الراحة.",
+        "service3Title": "خدمة VIP",
+        "service3Text": "خدمة الكونسيرج متاحة على مدار 24 ساعة للرد على جميع طلباتك الخاصة.",
+        
+        // Vehicles
+        "vehiclesTitle": "أسطولنا الحصري",
+        "seats1": "5 مقاعد",
+        "seats2": "5 مقاعد",
+        "seats3": "2+2 مقاعد",
+        "transmission1": "أوتوماتيكي",
+        "transmission2": "أوتوماتيكي",
+        "transmission3": "أوتوماتيكي",
+        "fuel1": "بنزين",
+        "fuel2": "هايبرد",
+        "fuel3": "بنزين",
+        "car1Desc": "الأداء والفخامة الألمانية في خدمة راحتك.",
+        "car2Desc": "قمة الفخامة في عالم السيارات، تكنولوجيا وراحة لا مثيل لها.",
+        "car3Desc": "أسطورة السيارات لعشاق الإحساس القوي.",
+        "car1Price": "179€ / يوم",
+        "car2Price": "199€ / يوم",
+        "car3Price": "249€ / يوم",
+        
+        // Location Section
+        "locationTitle": "موقعنا",
+        "mapTitle": "كليجناكار المغرب",
+        "mapAddress": "شارع محمد السادس، الدار البيضاء، المغرب",
+        "mapHours": "الإثنين-الأحد: 8:00-22:00",
+        "detailsTitle": "تفاصيل الاتصال",
+        "addressTitle": "العنوان الرئيسي",
+        "fullAddress": "شارع محمد السادس، مبنى بريستيج<br>الطابق الثاني، المكتب 204<br>20000 الدار البيضاء، المغرب",
+        "phoneTitle": "الهواتف",
+        "hoursTitle": "ساعات العمل",
+        "detailedHours": "<strong>الإثنين - السبت:</strong> 8:00 - 22:00<br><strong>الأحد:</strong> 9:00 - 20:00<br><strong>خدمة الطوارئ:</strong> 24 ساعة، 7 أيام",
+        "emailTitle": "البريد الإلكتروني",
+        
+        // Footer Coordinates
+        "footerAddressTitle": "العنوان الكامل",
+        "footerAddress": "شارع محمد السادس، مبنى بريستيج، الطابق الثاني، المكتب 204، 20000 الدار البيضاء، المغرب",
+        "footerGPS": "إحداثيات GPS: 33.5731° شمالاً، 7.5898° غرباً",
+        "footerContactTitle": "الاتصال المباشر",
+        "footerHoursTitle": "ساعات العمل الموسعة",
+        "footerWeekDays": "الإثنين-السبت: 8:00-22:00",
+        "footerWeekend": "الأحد: 9:00-20:00",
+        "footerEmergency": "الطوارئ: 24 ساعة، 7 أيام",
+        
+        // Contact
+        "contactTitle": "الاتصال والحجز",
+        "contactInfoTitle": "معلومات الاتصال",
+        "addressLabel": "العنوان",
+        "address": "شارع محمد السادس، الدار البيضاء، المغرب",
+        "phoneLabel": "الهاتف",
+        "hoursLabel": "ساعات العمل",
+        "hours": "الإثنين - الأحد: 8:00 - 22:00",
+        "emailLabel": "البريد الإلكتروني",
+        "reservationTitle": "طلب حجز",
+        "namePlaceholder": "اسمك الكامل",
+        "phonePlaceholder": "رقم هاتفك",
+        "emailPlaceholder": "بريدك الإلكتروني",
+        "selectDefault": "اختر مركبة",
+        "option1": "بي إم دبليو الفئة 7",
+        "option2": "مرسيدس الفئة S",
+        "option3": "بورش 911",
+        "option4": "مركبة فاخرة أخرى",
+        "messagePlaceholder": "التواريخ المطلوبة والمعلومات الإضافية...",
+        "submitBtn": "إرسال الطلب",
+        
+        // Footer
+        "footerText": "تأجير سيارات فاخرة في المغرب. ضمان التميز.",
+        "footerNavTitle": "التنقل",
+        "footerNav1": "خدماتنا",
+        "footerNav2": "أسطولنا",
+        "footerNav3": "الموقع",
+        "footerNav4": "الاتصال والحجز",
+        "footerFollowTitle": "تابعنا",
+        "copyrightText": "© 2025 كليجناكار – تأجير سيارات فاخرة – جميع الحقوق محفوظة",
+        
+        // WhatsApp
+        "whatsappTooltip": "اتصل بنا على واتساب",
+        "bubbleTitle": "دعم كليجناكار",
+        "bubbleMessage": "مرحباً! هل تحتاج مساعدة في تأجير سيارتك الفاخرة؟ نحن هنا لمساعدتك!",
+        "whatsappMessage": "مرحباً كليجناكار، أنا مهتم بتأجير سيارة.",
+        "notificationSending": "جاري فتح واتساب...",
+        "notificationSuccess": "تم إرسال الطلب بنجاح!",
+        "languageChanged": "تم تغيير اللغة إلى العربية"
+    },
+    
+    en: {
+        // Navigation
+        "nav-services": "Services",
+        "nav-vehicles": "Vehicles",
+        "nav-location": "Location",
+        "nav-contact": "Contact",
+        
+        // Hero
+        "heroTitle": "Luxury & Sports Car Rental",
+        "heroText": "Live an exclusive automotive experience with CLIGNANCAR. Our premium fleet and exceptional service await you.",
+        "heroBtn": "Discover the fleet",
+        
+        // Services
+        "servicesTitle": "Our Services",
+        "service1Title": "Premium Rental",
+        "service1Text": "High-end vehicles regularly maintained. Comprehensive insurance included.",
+        "service2Title": "Airport Service",
+        "service2Text": "Delivery and collection directly at the airport for more convenience.",
+        "service3Title": "VIP Service",
+        "service3Text": "Concierge service available 24/7 to respond to all your special requests.",
+        
+        // Vehicles
+        "vehiclesTitle": "Our Exclusive Fleet",
+        "seats1": "5 seats",
+        "seats2": "5 seats",
+        "seats3": "2+2 seats",
+        "transmission1": "Automatic",
+        "transmission2": "Automatic",
+        "transmission3": "Automatic",
+        "fuel1": "Petrol",
+        "fuel2": "Hybrid",
+        "fuel3": "Petrol",
+        "car1Desc": "German performance and elegance at the service of your comfort.",
+        "car2Desc": "The pinnacle of automotive luxury, with unmatched technology and comfort.",
+        "car3Desc": "Automotive legend for thrill-seekers.",
+        "car1Price": "179€ / day",
+        "car2Price": "199€ / day",
+        "car3Price": "249€ / day",
+        
+        // Location Section
+        "locationTitle": "Our Location",
+        "mapTitle": "CLIGNANCAR Morocco",
+        "mapAddress": "Mohammed VI Avenue, Casablanca, Morocco",
+        "mapHours": "Mon-Sun: 8:00 AM-10:00 PM",
+        "detailsTitle": "Detailed Information",
+        "addressTitle": "Main Address",
+        "fullAddress": "Mohammed VI Avenue, Le Prestige Building<br>2nd Floor, Office 204<br>20000 Casablanca, Morocco",
+        "phoneTitle": "Phones",
+        "hoursTitle": "Opening Hours",
+        "detailedHours": "<strong>Monday - Saturday:</strong> 8:00 AM - 10:00 PM<br><strong>Sunday:</strong> 9:00 AM - 8:00 PM<br><strong>Emergency Service:</strong> 24/7",
+        "emailTitle": "Emails",
+        
+        // Footer Coordinates
+        "footerAddressTitle": "Full Address",
+        "footerAddress": "Mohammed VI Avenue, Le Prestige Building, 2nd Floor, Office 204, 20000 Casablanca, Morocco",
+        "footerGPS": "GPS: 33.5731° N, 7.5898° W",
+        "footerContactTitle": "Direct Contact",
+        "footerHoursTitle": "Extended Hours",
+        "footerWeekDays": "Mon-Sat: 8:00 AM-10:00 PM",
+        "footerWeekend": "Sunday: 9:00 AM-8:00 PM",
+        "footerEmergency": "Emergency: 24/7",
+        
+        // Contact
+        "contactTitle": "Contact & Reservation",
+        "contactInfoTitle": "Our Contact Information",
+        "addressLabel": "Address",
+        "address": "Mohammed VI Avenue, Casablanca, Morocco",
+        "phoneLabel": "Phone",
+        "hoursLabel": "Opening Hours",
+        "hours": "Monday - Sunday: 8:00 AM - 10:00 PM",
+        "emailLabel": "Email",
+        "reservationTitle": "Reservation Request",
+        "namePlaceholder": "Your full name",
+        "phonePlaceholder": "Your phone number",
+        "emailPlaceholder": "Your email",
+        "selectDefault": "Select a vehicle",
+        "option1": "BMW Series 7",
+        "option2": "Mercedes Class S",
+        "option3": "Porsche 911",
+        "option4": "Other premium vehicle",
+        "messagePlaceholder": "Desired dates and additional information...",
+        "submitBtn": "Send request",
+        
+        // Footer
+        "footerText": "Premium car rental in Morocco. Excellence guaranteed.",
+        "footerNavTitle": "Navigation",
+        "footerNav1": "Our services",
+        "footerNav2": "Our fleet",
+        "footerNav3": "Location",
+        "footerNav4": "Contact & reservation",
+        "footerFollowTitle": "Follow us",
+        "copyrightText": "© 2025 CLIGNANCAR – Premium car rental – All rights reserved",
+        
+        // WhatsApp
+        "whatsappTooltip": "Contact us on WhatsApp",
+        "bubbleTitle": "ClignanCar Support",
+        "bubbleMessage": "Hello! Need help with your premium car rental? We are here for you!",
+        "whatsappMessage": "Hello ClignanCar, I am interested in a car rental.",
+        "notificationSending": "Opening WhatsApp...",
+        "notificationSuccess": "Request sent successfully!",
+        "languageChanged": "Language changed to English"
+    }
+};
+
+// WhatsApp messages per language
+const whatsappMessages = {
+    fr: "Bonjour%20ClignanCar,%20je%20suis%20intéressé%20par%20une%20location%20de%20voiture.",
+    ar: "مرحباً%20كليجناكار،%20أنا%20مهتم%20بتأجير%20سيارة.",
+    en: "Hello%20ClignanCar,%20I%20am%20interested%20in%20a%20car%20rental."
+};
+
+// Language tooltips
+const languageTooltips = {
+    fr: "Français",
+    ar: "العربية",
+    en: "English"
+};
+</script>
+
+<script>
+// Initialisation de la carte
+let map;
+let marker;
+
+function initMap() {
+    // Coordonnées de Casablanca, Maroc
+    const casablancaCoords = [33.5731, -7.5898];
+    
+    // Création de la carte
+    map = L.map('map').setView(casablancaCoords, 14);
+    
+    // Ajout des tuiles OpenStreetMap
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        maxZoom: 18
+    }).addTo(map);
+    
+    // Personnalisation du marqueur
+    const goldIcon = L.divIcon({
+        className: 'custom-marker',
+        html: '<div style="background-color: #c9a24d; width: 30px; height: 30px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 10px rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center;"><i class="fas fa-car" style="color: white; font-size: 14px;"></i></div>',
+        iconSize: [30, 30],
+        iconAnchor: [15, 15]
+    });
+    
+    // Ajout du marqueur
+    marker = L.marker(casablancaCoords, {icon: goldIcon}).addTo(map);
+    
+    // Contenu du popup
+    const popupContent = `
+        <div style="text-align: center; padding: 10px;">
+            <h4 style="color: #c9a24d; margin-bottom: 8px;">CLIGNANCAR</h4>
+            <p style="margin: 5px 0;"><i class="fas fa-map-marker-alt" style="color: #c9a24d;"></i> Avenue Mohammed VI</p>
+            <p style="margin: 5px 0;">Casablanca, Maroc</p>
+            <p style="margin: 5px 0;"><i class="fas fa-phone" style="color: #c9a24d;"></i> +212 6 XX XX XX XX</p>
+            <a href="https://maps.google.com/?q=33.5731,-7.5898" target="_blank" style="display: inline-block; background: #c9a24d; color: black; padding: 5px 10px; text-decoration: none; border-radius: 3px; margin-top: 10px; font-size: 12px;">
+                <i class="fas fa-directions"></i> Itinéraire
+            </a>
+        </div>
+    `;
+    
+    marker.bindPopup(popupContent);
+    
+    // Ajout d'un cercle pour indiquer la zone
+    L.circle(casablancaCoords, {
+        color: '#c9a24d',
+        fillColor: '#c9a24d',
+        fillOpacity: 0.1,
+        radius: 500
+    }).addTo(map);
+}
+
+// Attendre que le DOM soit chargé
+document.addEventListener('DOMContentLoaded', function() {
+    initMap();
+    
+    // Animation de chargement de la carte
+    setTimeout(() => {
+        map.invalidateSize();
+    }, 300);
+});
+
+// Current language
+let currentLang = 'fr';
+
+// DOM elements
+const langButtons = document.querySelectorAll('.lang-float-btn');
+const body = document.body;
+
+// Menu mobile
+const menuToggle = document.getElementById('menuToggle');
+const navMenu = document.getElementById('navMenu');
+
+menuToggle.addEventListener('click', () => {
+    navMenu.classList.toggle('active');
+    menuToggle.innerHTML = navMenu.classList.contains('active') 
+        ? '<i class="fas fa-times"></i>' 
+        : '<i class="fas fa-bars"></i>';
+});
+
+// Fermer le menu en cliquant sur un lien
+document.querySelectorAll('#navMenu a').forEach(link => {
+    link.addEventListener('click', () => {
+        navMenu.classList.remove('active');
+        menuToggle.innerHTML = '<i class="fas fa-bars"></i>';
+    });
+});
+
+// Créer les tooltips pour les boutons de langue
+langButtons.forEach(btn => {
+    const lang = btn.dataset.lang;
+    const tooltip = document.createElement('div');
+    tooltip.className = 'lang-float-tooltip';
+    tooltip.textContent = languageTooltips[lang];
+    btn.appendChild(tooltip);
+});
+
+// Language switching function
+function switchLanguage(lang) {
+    currentLang = lang;
+    
+    // Update button states
+    langButtons.forEach(btn => {
+        if (btn.dataset.lang === lang) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    });
+    
+    // Update body direction for Arabic
+    if (lang === 'ar') {
+        body.classList.add('rtl');
+        body.classList.remove('ltr');
+    } else {
+        body.classList.remove('rtl');
+        body.classList.add('ltr');
+    }
+    
+    // Update all translatable elements
+    Object.keys(translations[lang]).forEach(key => {
+        const elements = document.querySelectorAll(`[data-key="${key}"]`);
+        elements.forEach(element => {
+            element.textContent = translations[lang][key];
+        });
+        
+        // Also update elements with specific IDs
+        const elementById = document.getElementById(key);
+        if (elementById) {
+            if (elementById.tagName === 'INPUT' || elementById.tagName === 'TEXTAREA' || elementById.tagName === 'SELECT') {
+                elementById.placeholder = translations[lang][key];
+            } else if (elementById.tagName === 'OPTION') {
+                elementById.textContent = translations[lang][key];
+            } else {
+                elementById.innerHTML = translations[lang][key];
+            }
+        }
+    });
+    
+    // Update WhatsApp link
+    const whatsappLink = document.getElementById('whatsappLink');
+    whatsappLink.href = `https://wa.me/212600000000?text=${whatsappMessages[lang]}`;
+    
+    // Update WhatsApp tooltip and bubble
+    document.getElementById('whatsappTooltip').textContent = translations[lang].whatsappTooltip;
+    document.getElementById('bubbleTitle').textContent = translations[lang].bubbleTitle;
+    document.getElementById('bubbleMessage').textContent = translations[lang].bubbleMessage;
+    
+    // Save language preference
+    localStorage.setItem('clignancar_lang', lang);
+    
+    // Redimensionner la carte après changement de langue
+    setTimeout(() => {
+        if (map) {
+            map.invalidateSize();
+        }
+    }, 300);
+    
+    // Show language change notification
+    showNotification(translations[lang].languageChanged);
+}
+
+// Language button click events
+langButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+        switchLanguage(btn.dataset.lang);
+    });
+});
+
+// Check saved language preference
+const savedLang = localStorage.getItem('clignacar_lang') || localStorage.getItem('clignancar_lang');
+if (savedLang && (savedLang === 'fr' || savedLang === 'ar' || savedLang === 'en')) {
+    switchLanguage(savedLang);
+} else {
+    // Set default language based on browser
+    const browserLang = navigator.language.substring(0, 2);
+    if (browserLang === 'ar') {
+        switchLanguage('ar');
+    } else if (browserLang === 'en') {
+        switchLanguage('en');
+    }
+}
+
+// WhatsApp Bubble Animation
+const whatsappBubble = document.getElementById('whatsappBubble');
+let bubbleShown = false;
+
+// Afficher la bulle après 3 secondes
+setTimeout(() => {
+    if (!bubbleShown) {
+        whatsappBubble.classList.add('show');
+        bubbleShown = true;
+        
+        // Masquer la bulle après 10 secondes
+        setTimeout(() => {
+            whatsappBubble.classList.remove('show');
+        }, 10000);
+    }
+}, 3000);
+
+// Réafficher la bulle quand on clique sur le bouton WhatsApp
+document.querySelector('.whatsapp-button').addEventListener('mouseenter', () => {
+    whatsappBubble.classList.add('show');
+});
+
+document.querySelector('.whatsapp-button').addEventListener('mouseleave', () => {
+    setTimeout(() => {
+        whatsappBubble.classList.remove('show');
+    }, 2000);
+});
+
+// Réafficher la bulle quand on fait défiler vers le bas
+let lastScrollTop = 0;
+window.addEventListener('scroll', () => {
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    
+    // Si on descend et qu'on a défilé plus de 300px
+    if (scrollTop > lastScrollTop && scrollTop > 300) {
+        whatsappBubble.classList.add('show');
+        
+        // Masquer après 5 secondes
+        setTimeout(() => {
+            whatsappBubble.classList.remove('show');
+        }, 5000);
+    }
+    
+    lastScrollTop = scrollTop;
+});
+
+// Notification function
+function showNotification(message) {
+    const notification = document.createElement('div');
+    notification.className = 'notification';
+    notification.textContent = message;
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.style.animation = currentLang === 'ar' ? 'slideOutLeft 0.5s ease' : 'slideOutRight 0.5s ease';
+        setTimeout(() => {
+            document.body.removeChild(notification);
+        }, 500);
+    }, 2000);
+}
+
+// Animation du bouton WhatsApp au clic
+document.querySelector('.whatsapp-button').addEventListener('click', function(e) {
+    // Animation de clic
+    this.style.transform = 'scale(0.9)';
+    setTimeout(() => {
+        this.style.transform = '';
+    }, 300);
+    
+    // Petite notification visuelle
+    showNotification(translations[currentLang].notificationSending);
+});
+
+// Gestion du formulaire de réservation
+document.getElementById('reservationForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    // Animation de soumission
+    const submitBtn = this.querySelector('button[type="submit"]');
+    const originalText = submitBtn.textContent;
+    
+    submitBtn.textContent = currentLang === 'fr' ? 'Envoi en cours...' : 
+                           currentLang === 'ar' ? 'جاري الإرسال...' : 
+                           'Sending...';
+    submitBtn.disabled = true;
+    
+    // Simulation d'envoi
+    setTimeout(() => {
+        // Notification de succès
+        showNotification(translations[currentLang].notificationSuccess);
+        
+        // Réinitialiser le bouton
+        submitBtn.textContent = originalText;
+        submitBtn.disabled = false;
+        
+        // Réinitialiser le formulaire
+        this.reset();
+    }, 1500);
+});
+
+// Add animation styles if not present
+if (!document.querySelector('#notification-styles')) {
+    const style = document.createElement('style');
+    style.id = 'notification-styles';
+    document.head.appendChild(style);
+}
+
+// Animation for language buttons on load
+document.addEventListener('DOMContentLoaded', () => {
+    // Animate language buttons one by one
+    const buttons = document.querySelectorAll('.lang-float-btn');
+    buttons.forEach((btn, index) => {
+        setTimeout(() => {
+            btn.style.transform = 'translateX(0)';
+            btn.style.opacity = '1';
+        }, index * 100);
+    });
+});
+</script>
+</body>
+</html>
