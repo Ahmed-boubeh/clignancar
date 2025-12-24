@@ -1,0 +1,31 @@
+<!-- filepath: c:\Users\hp\Documents\CLignanCar\robots.txt -->
+# Robots.txt pour ClignanCar
+
+User-agent: *
+Allow: /
+Allow: /css/
+Allow: /js/
+Allow: /images/
+
+Disallow: /admin/
+Disallow: /private/
+Disallow: /temp/
+Disallow: /*.pdf$
+Disallow: /cgi-bin/
+
+# Crawl delay
+Crawl-delay: 1
+
+# Sitemaps
+Sitemap: https://www.clignancar.com/sitemap.xml
+Sitemap: https://www.clignancar.com/sitemap-blog.xml
+
+# Règles spécifiques pour Google
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 0
+
+# Règles spécifiques pour Bing
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 1

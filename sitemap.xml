@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
+    <!-- Page d'accueil -->
+    <url>
+        <loc>https://www.clignancar.com</loc>
+        <lastmod>2025-12-24</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>1.0</priority>
+    </url>
+    
+    <!-- Section Services -->
+    <url>
+        <loc>https://www.clignancar.com/#services</loc>
+        <lastmod>2025-12-24</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    
+    <!-- Section Véhicules -->
+    <url>
+        <loc>https://www.clignancar.com/#cars</loc>
+        <lastmod>2025-12-24</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.9</priority>
+        <image:image>
+            <image:loc>https://www.clignancar.com/images/bmw-7.jpg</image:loc>
+            <image:title>BMW Série 7 - Location Casablanca</image:title>
+        </image:image>
+        <image:image>
+            <image:loc>https://www.clignancar.com/images/mercedes-s.jpg</image:loc>
+            <image:title>Mercedes Classe S - Location Casablanca</image:title>
+        </image:image>
+    </url>
+    
+    <!-- Section Localisation -->
+    <url>
+        <loc>https://www.clignancar.com/#location</loc>
+        <lastmod>2025-12-24</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.7</priority>
+    </url>
+    
+    <!-- Section Contact -->
+    <url>
+        <loc>https://www.clignancar.com/#contact</loc>
+        <lastmod>2025-12-24</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    
+    <!-- Blog (à ajouter) -->
+    <url>
+        <loc>https://www.clignancar.com/blog</loc>
+        <lastmod>2025-12-24</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+    </url>
+</urlset>
