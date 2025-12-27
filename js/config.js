@@ -4,7 +4,7 @@ let marker;
 
 function initMap() {
     // Coordonnées de Casablanca, Maroc
-    const casablancaCoords = [33.5731, -7.5898];
+    const casablancaCoords = [33.62301351088492, -7.4969011863540524];
     
     // Création de la carte
     map = L.map('map').setView(casablancaCoords, 14);
@@ -30,10 +30,10 @@ function initMap() {
     const popupContent = `
         <div style="text-align: center; padding: 10px;">
             <h4 style="color: #c9a24d; margin-bottom: 8px;">CLIGNANCAR</h4>
-            <p style="margin: 5px 0;"><i class="fas fa-map-marker-alt" style="color: #c9a24d;"></i> Avenue Mohammed VI</p>
-            <p style="margin: 5px 0;">Casablanca, Maroc</p>
+            <p style="margin: 5px 0;"><i class="fas fa-map-marker-alt" style="color: #c9a24d;"></i>MIXTE MASKANE AL ALIA ZN INDUS ETAGE MG GH3 IMM 25 MG87</p>
+            <p style="margin: 5px 0;">Sidi Bernoussi, Casablanca, Maroc</p>
             <p style="margin: 5px 0;"><i class="fas fa-phone" style="color: #c9a24d;"></i> +212 6 XX XX XX XX</p>
-            <a href="https://maps.google.com/?q=33.5731,-7.5898" target="_blank" style="display: inline-block; background: #c9a24d; color: black; padding: 5px 10px; text-decoration: none; border-radius: 3px; margin-top: 10px; font-size: 12px;">
+            <a href="https://maps.google.com/?q=33.62301351088492,-7.4969011863540524" target="_blank" style="display: inline-block; background: #c9a24d; color: black; padding: 5px 10px; text-decoration: none; border-radius: 3px; margin-top: 10px; font-size: 12px;">
                 <i class="fas fa-directions"></i> Itinéraire
             </a>
         </div>
